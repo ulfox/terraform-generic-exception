@@ -7,7 +7,7 @@ Terraform module for raising exceptions on condition
 ```hcl
 module "raise_error_instance_type" {
   source            = "github.com/ulfox/terraform-generic-exception.git?ref=v0.0.1"
-  shell_condition   = "echo ${var.bastion_instance_type} | grep -iE '(t[0-9]+)\.([a-z]+)'"
+  shell_condition   = "if ! echo ${var.bastion_instance_type} | grep -iE '(t[0-9]+)\.([a-z]+)'; then exit 1; fi"
   message           = "Wrong Instance Type"
 }
 
