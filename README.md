@@ -6,7 +6,7 @@ Terraform module for raising exceptions on condition
 
 ```hcl
 module "raise_error_instance_type" {
-  source            = "github.com/ulfox/terraform-generic-exception.git?ref=v0.0.1"
+  source            = "github.com/ulfox/terraform-generic-exception.git?ref=v0.0.3"
   shell_condition   = "if ! echo ${var.bastion_instance_type} | grep -iE '(t[0-9]+)\.([a-z]+)'; then exit 1; fi"
   message           = "Wrong Instance Type"
 }
@@ -25,14 +25,43 @@ resource "aws_instance" "bastion" {
 
 ```hcl
 module "raise_error_region" {
-  source            = "github.com/ulfox/terraform-generic-exception.git?ref=v0.0.1"
+  source            = "github.com/ulfox/terraform-generic-exception.git?ref=v0.0.3"
   condition         = [var.region, "==", "eu-west-1"]
   exit_code         = 1
   message           = "Only eu-west-1 region is allowd"
 }
 module "raise_error_prod_account" {
-  source            = "github.com/ulfox/terraform-generic-exception.git?ref=v0.0.1"
+  source            = "github.com/ulfox/terraform-generic-exception.git?ref=v0.0.3"
   condition         = [data.aws_caller_identity.current.account_id, "!=", "<someAccountID>"]
+  exit_code         = 1
+  message           = "Error, you are using production account"
+}
+
+resource "aws_instance" "bastion" {
+  ami                         = local.bastion_ami_id
+  instance_type               = var.bastion_instance_type
+  key_name                    = var.bastion_ssh_keypair_name
+  subnet_id                   = var.bastion_subnet_id
+  vpc_security_group_ids      = local.bastion_vpc_security_group_ids
+  associate_public_ip_address = local.bastion_set_public_ip
+  availability_zone           = var.bastion_availability_zone
+  ...
+  depends_on = [
+    module.raise_error_region,
+    module.raise_error_prod_account,
+  ]
+}
+```
+
+## Multi Conditions Example
+
+```hcl
+module "raise_error_bastion" {
+  source            = "github.com/ulfox/terraform-generic-exception.git?ref=v0.0.3"
+  multi_condition   = [
+    [data.aws_caller_identity.current.account_id, "!=", "<someAccountID>"],
+    [var.region, "==", "eu-west-1"],
+  ]
   exit_code         = 1
   message           = "Error, you are using production account"
 }
