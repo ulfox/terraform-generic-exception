@@ -70,6 +70,8 @@ No requirements.
 | condition | The condition | `list(string)` | `null` | no |
 | exit\_code | The exit code | `string` | `null` | no |
 | message | The exit message | `string` | `null` | no |
+| multi\_condition | Multi condition | `list(list(string))` | `null` | no |
+| multi\_shell\_condition | Shell multi condition | `list(string)` | `null` | no |
 | shell\_condition | The shell condition | `string` | `null` | no |
 
 ## Outputs

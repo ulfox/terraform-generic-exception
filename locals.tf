@@ -8,7 +8,12 @@ locals {
     condition = (
         var.condition == null || var.condition == []
     ) ? [] : var.condition
-
+    multi_condition = (
+        var.multi_condition == null || var.multi_condition == []
+    ) ? [] : var.multi_condition
+    multi_shell_condition = (
+        var.multi_shell_condition == null || var.multi_shell_condition == []
+    ) ? [] : var.multi_shell_condition
 
     is_shell_condition = (
         local.shell_condition == ""
@@ -16,6 +21,14 @@ locals {
 
     is_condition = (
         length(local.condition) == 0
+    ) ? false : true
+
+    is_multi_condition = (
+        length(local.multi_condition) == 0
+    ) ? false : true
+
+    is_multi_shell_condition = (
+        length(local.multi_shell_condition) == 0
     ) ? false : true
 
     message = var.message == null ? (
@@ -37,17 +50,18 @@ locals {
         length(local.condition) == 1 ? 1 : 0
     )
 
-    expression = (
+    shell_expression = (
         local.is_shell_condition == true
     ) ? (
         format(
             "trap 'info' EXIT; info() { echo $message; }; %s",
             local.shell_condition,
         )
-    ) : (
+    ) : "exit ${local.exit_code}"
+
+    expression = (
         local.is_condition == true
     ) ? (
-        (
             local.expression_check == 3
         ) ? (
             format(
@@ -70,6 +84,5 @@ locals {
                     local.exit_code,
                 )  
             ) : ""
-        )
-    ) : "exit ${local.exit_code}"
+        ) : "exit ${local.exit_code}"
 }
